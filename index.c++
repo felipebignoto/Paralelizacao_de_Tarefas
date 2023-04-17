@@ -17,6 +17,8 @@ private:
     
 
 public:
+   
+
     Task(int index)
     {
         this->index = index;
@@ -25,18 +27,14 @@ public:
     void run()
     {
         mtx.lock();
-
-       bool prime = this->isPrime(index);
-
-        if (prime == true)
-        {
-            cout << "o numero " << index << " eh primo" <<endl;
-           
+        //cout<<"criando objeto"<<endl;
+        if(isPrime(index)){
+            cout<<"o numero "<<index<<" eh primo"<<endl;
         }
-
         mtx.unlock();
         
     }
+
 
     bool isPrime(int index){
         
@@ -51,6 +49,7 @@ public:
             }
         }
         return prime;
+        
     }
 
     
@@ -60,8 +59,10 @@ int main()
 {
     int a = 1;
     int b = 10;
-    list<thread *> threads;
+    int k = 0;
+    int vet[b];
 
+    list<thread *> threads;
     list<Task *> tasks;
     list<int> primes;
 
@@ -69,12 +70,18 @@ int main()
     {
         Task *task = new Task(i);
         thread *taskThread = new thread(&Task::run, task);
-       
+
+        if(task->isPrime(i) == true){//adiciono todos os primos no vetor vet
+            vet[k] = i;
+            cout<<" i = "<<i<<" e vet[k] = "<<vet[k]<<endl;
+            k++;
+        }
+        
         tasks.push_back(task);
         threads.push_back(taskThread);
     }
-    
 
+   
     for (list<thread *>::iterator it = threads.begin(); it != threads.end(); ++it)
     {
         (*it)->join();
@@ -84,6 +91,10 @@ int main()
     for (list<Task *>::iterator it = tasks.begin(); it != tasks.end(); ++it)
     {
         delete (*it);
+    }
+
+     for(int contador = 0; contador < k; contador++){
+        primes.push_back(vet[k]);
     }
 
     ofstream outputFile("primes.txt");
