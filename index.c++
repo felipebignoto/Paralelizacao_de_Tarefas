@@ -7,7 +7,7 @@
 #include <fstream>
 
 using namespace std;
-
+ofstream outputFile("primes.txt");
 std::mutex mtx;
 
 class Task
@@ -15,31 +15,47 @@ class Task
 private:
 
     int index;
+    int final;
+    int inicio;
     
 
 public:
    
 
-    Task( int index)
+    Task( int index, int final, int inicio)
     {
         
         this->index = index;
-       
+        this->final = final;
+        this->inicio = inicio;
     }
 
     void run()
     {
-        mtx.lock();
+        
+        /* Teste para verificar o paralelismo
+        if(index == 953){
+            _sleep(50);
+        }
+        */
 
-        if(index == 5){
-            _sleep(500);
-        }
-        
         if(isPrime(index)){
-            cout<<"O numero "<<index<<" eh primo" <<endl;
+            //cout<<"O numero "<<index<<" eh primo" <<endl;
+           
+            if(outputFile.is_open())
+            {
+                outputFile << index << " ";
+                if(index == final ){//fecho o arquivo quando estiver no ultimo número
+                    outputFile.close();
+                }
+            }
+            else
+            {
+                cout << "Erro ao gravar o arquivo final" << endl;
+            }
         }
+
         
-        mtx.unlock();
         
     }
 
@@ -70,9 +86,9 @@ int main()
     list<thread *> threads;
     list<Task *> tasks;
 
-    for(int i = b; i >= a; i--)
+    for(int i = a; i <b; i++)
     {
-        Task* task = new Task(i);
+        Task* task = new Task(i,b,a);
         thread *taskThread = new thread(&Task::run, task);
 
         tasks.push_back(task);
